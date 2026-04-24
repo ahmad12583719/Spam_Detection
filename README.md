@@ -130,7 +130,7 @@ The app opens at `http://localhost:8501`
 ## 📄 Forensic PDF Report Contents
 
 Each PDF includes:
-1. AR Forensics & CyberSecurity Labs
+1. AR Forensics & CyberSecurity Labs Letter Head
 2. Case metadata (Case ID, Timestamp, AI Engine, Model version)
 3. Full evidence text (Exhibit A)
 4. AI Verdict panel with colour-coded badge
