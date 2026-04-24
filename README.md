@@ -174,7 +174,7 @@ Then convert the tab-separated file and rename columns to `label` and `message`.
 | `forensic_ai_model` | Loaded sklearn Pipeline (TF-IDF + NaiveBayes) |
 | `scam_probability` | P(scam) from `predict_proba()` |
 | `ai_verdict` | Final classification: CRITICAL SCAM / SUSPICIOUS / LEGITIMATE |
-| `assigned_case_id` | UUID-based case identifier (e.g. LGU-A3F1B2C4) |
+| `assigned_case_id` | UUID-based case identifier (e.g. AR-A3F1B2C4) |
 | `crime_dataset` | Full pandas DataFrame loaded from CSV |
 | `forensic_ml_pipeline` | sklearn Pipeline object |
 | `pdf_byte_buffer` | In-memory BytesIO object for PDF generation |
