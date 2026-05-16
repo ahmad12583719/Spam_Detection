@@ -88,6 +88,7 @@ def generate_forensic_pdf_report(
 
     # ── Buffer setup — write PDF bytes to memory, not a file ─────────────
     pdf_byte_buffer = io.BytesIO()
+    _u = case_id.replace("-", "")
 
     # ── Document setup ────────────────────────────────────────────────────
     forensic_report_doc = SimpleDocTemplate(
@@ -103,7 +104,7 @@ def generate_forensic_pdf_report(
     base_styles = getSampleStyleSheet()
 
     style_header_main = ParagraphStyle(
-        "HeaderMain",
+        f"HeaderMain_{_u }",  # Unique style name to avoid conflicts
         parent    = base_styles["Heading1"],
         fontSize  = 16,
         textColor = COLOUR_WHITE,
@@ -112,7 +113,7 @@ def generate_forensic_pdf_report(
         fontName  = "Helvetica-Bold",
     )
     style_header_sub = ParagraphStyle(
-        "HeaderSub",
+        f"HeaderSub_{_u }",
         parent    = base_styles["Normal"],
         fontSize  = 9,
         textColor = COLOUR_LIGHT_GREY,
@@ -120,7 +121,7 @@ def generate_forensic_pdf_report(
         fontName  = "Helvetica",
     )
     style_section_title = ParagraphStyle(
-        "SectionTitle",
+        f"SectionTitle_{_u }",
         parent    = base_styles["Heading2"],
         fontSize  = 11,
         textColor = COLOUR_DEEP_NAVY,
@@ -129,7 +130,7 @@ def generate_forensic_pdf_report(
         spaceAfter = 4,
     )
     style_body = ParagraphStyle(
-        "Body",
+        f"Body_{_u }",
         parent    = base_styles["Normal"],
         fontSize  = 9,
         textColor = colors.black,
@@ -138,7 +139,7 @@ def generate_forensic_pdf_report(
         fontName  = "Helvetica",
     )
     style_evidence_box = ParagraphStyle(
-        "EvidenceBox",
+        f"EvidenceBox_{_u }",
         parent     = base_styles["Normal"],
         fontSize   = 9,
         textColor  = colors.black,
@@ -150,7 +151,7 @@ def generate_forensic_pdf_report(
         borderPad  = 4,
     )
     style_verdict_text = ParagraphStyle(
-        "VerdictText",
+        f"VerdictText_{_u }",
         parent    = base_styles["Normal"],
         fontSize  = 14,
         textColor = _get_verdict_colour(ai_verdict),
@@ -158,7 +159,7 @@ def generate_forensic_pdf_report(
         alignment = TA_CENTER,
     )
     style_footer = ParagraphStyle(
-        "Footer",
+        f"Footer_{_u }",
         parent    = base_styles["Normal"],
         fontSize  = 7.5,
         textColor = colors.grey,
@@ -166,7 +167,7 @@ def generate_forensic_pdf_report(
         fontName  = "Helvetica-Oblique",
     )
     style_disclaimer = ParagraphStyle(
-        "Disclaimer",
+        f"Disclaimer_{_u }",
         parent    = base_styles["Normal"],
         fontSize  = 8,
         textColor = colors.HexColor("#555555"),
@@ -210,15 +211,15 @@ def generate_forensic_pdf_report(
         ["Report Generated",     report_generated_at],
         ["Analyst System",       "Criminal Scam Analysis System v1.0"],
         ["AI Engine",            "Multinomial Naive Bayes + TF-IDF (sklearn)"],
-        ["Classification Model", "scam_model.pkl (Trained on SMS Spam Dataset)"],
+        ["Classification Model", "spam_model.pkl (Trained on SMS Spam Dataset)"],
     ]
 
     cell_style_label = ParagraphStyle(
-        "CellLabel", parent=base_styles["Normal"],
+        f"CellLabel_{_u }", parent=base_styles["Normal"],
         fontSize=8.5, fontName="Helvetica-Bold", textColor=COLOUR_DEEP_NAVY,
     )
     cell_style_value = ParagraphStyle(
-        "CellValue", parent=base_styles["Normal"],
+        f"CellValue_{_u }", parent=base_styles["Normal"],
         fontSize=8.5, fontName="Helvetica", textColor=colors.black,
     )
 
@@ -286,7 +287,7 @@ def generate_forensic_pdf_report(
         [
             Paragraph(
                 f"AI Confidence Score: <b>{confidence_score * 100:.2f}%</b>",
-                ParagraphStyle("Conf", parent=base_styles["Normal"],
+                ParagraphStyle(f"Conf_{_u }", parent=base_styles["Normal"],
                                fontSize=10, alignment=TA_CENTER, fontName="Helvetica"),
             ),
         ],
@@ -350,11 +351,11 @@ def generate_forensic_pdf_report(
         ["Supervisor Approval:",   "______________________________", "Date:",     "________"],
     ]
     sig_style = ParagraphStyle(
-        "Sig", parent=base_styles["Normal"],
+        f"Sig_{_u }", parent=base_styles["Normal"],
         fontSize=8, fontName="Helvetica-Bold",
     )
     sig_value_style = ParagraphStyle(
-        "SigVal", parent=base_styles["Normal"],
+        f"SigVal_{_u }", parent=base_styles["Normal"],
         fontSize=8, fontName="Helvetica",
     )
     sig_table_data = [

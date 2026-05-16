@@ -4,7 +4,7 @@
   AI-Driven Criminal Scam Analysis & Case Tracking System
 =============================================================================
   PURPOSE  : Train a Naive Bayes classifier to detect scam / spam messages.
-             This module is run ONCE (offline) to produce 'scam_model.pkl',
+             This module is run ONCE (offline) to produce 'spam_model.pkl',
              which the live Streamlit app then loads for real-time analysis.
 
   AUTHOR   : Ahmad Raza
@@ -29,12 +29,12 @@ from sklearn.metrics import classification_report, accuracy_score  # Evaluation 
 # ─────────────────────────────────────────────────────────────────────────
 #  CONFIGURATION — centralise all magic strings & paths here
 # ─────────────────────────────────────────────────────────────────────────
-DATASET_PATH   = "sms_spam.csv"    # Input CSV with 'label' and 'message' columns
-MODEL_SAVE_PATH = "scam_model.pkl" # Output: serialised sklearn Pipeline
+DATASET_PATH   = "spam.csv"    # Input CSV with 'label' and 'message' columns
+MODEL_SAVE_PATH = "spam_model.pkl" # Output: serialised sklearn Pipeline
 TEST_SIZE       = 0.25             # 25 % of data reserved for evaluation
 RANDOM_SEED     = 42               # Reproducibility — same split every run
 # TF-IDF hyper-parameters (chosen to balance recall on short SMS texts)
-TFIDF_MAX_FEATURES = 3000          # Vocabulary cap — keeps the model lightweight
+TFIDF_MAX_FEATURES = 6000         # Vocabulary cap — keeps the model lightweight
 TFIDF_NGRAM_RANGE  = (1, 2)        # Unigrams + bigrams capture phrases like "click here"
 
 
@@ -82,28 +82,33 @@ def clean_crime_evidence(raw_message: str) -> str:
 #       integrity checks before doing anything expensive.
 # ─────────────────────────────────────────────────────────────────────────
 def load_and_validate_dataset(dataset_path: str) -> pd.DataFrame:
-    """
-    Load the SMS Spam CSV, validate its structure, and return a clean DataFrame.
-    Raises FileNotFoundError or ValueError with informative messages on failure.
-    """
-    # Guard: file must exist before we attempt to read it
+
     if not os.path.exists(dataset_path):
         raise FileNotFoundError(
-            f"[TRAINER ERROR] Dataset not found at '{dataset_path}'.\n"
-            f"  ➜  Download 'SMSSpamCollection' from UCI ML Repository, save\n"
-            f"     as '{dataset_path}' with columns: label, message"
+            f"[TRAINER ERROR] Dataset not found at '{dataset_path}'."
         )
 
-    # Read CSV — support both comma-separated and tab-separated formats
     try:
         raw_dataset = pd.read_csv(dataset_path, encoding="utf-8")
+    except UnicodeDecodeError:
+        # Kaggle's file is sometimes latin-1 encoded
+        raw_dataset = pd.read_csv(dataset_path, encoding="latin-1")
     except Exception as csv_error:
         raise ValueError(f"[TRAINER ERROR] Could not parse CSV: {csv_error}")
 
-    # Normalise column names to lowercase for robustness
+    # Normalise column names
     raw_dataset.columns = [col.strip().lower() for col in raw_dataset.columns]
 
-    # Validate required columns exist
+    # ── NEW: Remap Kaggle column names to your standard names ──
+    kaggle_column_map = {
+        "v1": "label",
+        "v2": "message",
+        "category": "label",   # some versions use this
+        "text": "message",     # some versions use this
+    }
+    raw_dataset.rename(columns=kaggle_column_map, inplace=True)
+    # ──────────────────────────────────────────────────────────
+
     required_columns = {"label", "message"}
     missing_columns  = required_columns - set(raw_dataset.columns)
     if missing_columns:
@@ -112,16 +117,18 @@ def load_and_validate_dataset(dataset_path: str) -> pd.DataFrame:
             f"  ➜  Found columns: {list(raw_dataset.columns)}"
         )
 
-    # Drop rows where either field is null (garbage data)
     initial_row_count  = len(raw_dataset)
     raw_dataset        = raw_dataset.dropna(subset=["label", "message"])
     dropped_row_count  = initial_row_count - len(raw_dataset)
+
+    # ── NEW: Drop any extra Kaggle columns (v3, v4, v5 are unnamed garbage cols) ──
+    raw_dataset = raw_dataset[["label", "message"]]
+    # ─────────────────────────────────────────────────────────────────────────────
 
     print(f"  ✓ Loaded {initial_row_count} records  |  Dropped {dropped_row_count} nulls")
     print(f"  ✓ Class distribution:\n{raw_dataset['label'].value_counts().to_string()}")
 
     return raw_dataset
-
 
 # ─────────────────────────────────────────────────────────────────────────
 #  STEP 3 — FEATURE ENGINEERING
@@ -144,7 +151,7 @@ def build_forensic_pipeline() -> Pipeline:
         max_features = TFIDF_MAX_FEATURES,
         ngram_range  = TFIDF_NGRAM_RANGE,
         sublinear_tf = True,
-        min_df       = 1,
+        min_df       = 2,
         analyzer     = "word",
     )
 

@@ -1,0 +1,8 @@
+# .gitignore
+spam_model.pkl
+crime_database.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env

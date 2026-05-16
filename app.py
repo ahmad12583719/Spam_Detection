@@ -194,16 +194,21 @@ st.markdown(CUSTOM_STYLES, unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────────────────
 #  CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────
-MODEL_FILE_PATH  = "scam_model.pkl"
+MODEL_FILE_PATH  = "spam_model.pkl"
 SCAM_THRESHOLD   = db.SCAM_THRESHOLD
 SUSPICIOUS_THRESHOLD = db.SUSPICIOUS_THRESHOLD
 
 # Keywords commonly associated with criminal scam messages
 RED_FLAG_KEYWORDS = [
+    # Original
     "winner", "free", "prize", "claim", "urgent", "click",
     "verify", "bank", "account", "password", "loan", "cash",
     "congratulations", "selected", "reward", "exclusive", "offer",
     "guaranteed", "approved", "suspended", "alert",
+    # Common in Kaggle SMS spam
+    "txt", "mobile", "call", "reply", "stop", "send",
+    "per", "awarded", "customer", "service", "£", "win",
+    "credited", "voucher", "ringtone", "subscription", "contract",
 ]
 
 
@@ -598,7 +603,7 @@ elif "New Analysis" in selected_page:
     example_evidence_texts = {
         "-- Select an example --"      : "",
         "🔴 Example: Prize Scam"       : "WINNER!! Congratulations! You have been selected to claim a FREE prize of Rs.50,000. Urgent: Call now to verify your bank account and claim before offer expires!",
-        "🟡 Example: Phishing Attempt" : "Your account has been flagged. Please verify your details by clicking the link provided, or your access will be restricted.",
+        "🟡 Example: Suspicious Message" : "You have been selected for a special offer. Call us back if interested.",
         "🟢 Example: Normal Message"   : "Hey, are you coming to the Digital Forensics lecture tomorrow morning? Let me know so we can meet at the library.",
     }
     selected_example = st.selectbox("Quick Evidence Examples:", list(example_evidence_texts.keys()))
